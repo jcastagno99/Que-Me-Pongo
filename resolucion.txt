@@ -1,0 +1,236 @@
+class Atuendo
+{
+  ArrayList<Prenda> prendas; 
+}
+  
+class Prenda{
+  
+  Tipo tipo 
+  Categoria categoria
+  Material material
+  Color colorPrincipal
+  Color colorSecundario
+  
+   Prenda(Tipo unTipo,Material unMaterial, Color unColorPrincipal,Categoria unaCategoria){ 
+   if(unTipo == NULL){
+    throw new TipoNuloException("La prenda debe tener un tipo");
+    }
+   if(unaCategoria == NULL){
+      throw new CategoriaNulaException("La prenda debe tener una categoria");
+    }
+   if(unMaterial == NULL){
+      throw new MaterialNuloException("La prenda debe tener un material");
+    }
+   if(unColor == NULL){
+      throw new ColorNuloException("La prenda debe poseer un color principal");
+    }
+
+   if(unTipo.getCategoria != unaCategoria){  
+    throw new CategoriaException("La categoria no se corresponde con el tipo");
+   }
+   
+   this.tipo = unTipo;
+   this.categoria = unaCategoria;
+   this.material = unMaterial;
+   this.colorPrincipal = unColorPrincipal;
+   
+   }
+   
+   void elegirColorSecundario(Color unColor){
+   this.colorSecundario = unColor;
+   }
+   
+ }
+ 
+ 
+ class Tipo{
+   String nombre;
+   Categoria categoria;
+   
+   Tipo(String nombre, Categoria categoria){
+    this.nombre = nombre;
+    this.categoria = categoria;
+    }
+    
+   Categoria getCategoria(){
+     return this.categoria;
+     }  
+ }
+ 
+ 
+ enum Categoria
+ {
+    PARTE_SUPERIOR,CALZADO,PARTE_INFERIOR,ACCESORIOS;
+ }
+ 
+ 
+ Class Color
+ {
+    String codigoRGB;
+    
+    Color(String codigo){
+    this.codigoRGB = codigo;
+    }
+ }
+ 
+ 
+ Class Material
+ {
+    TipoMaterial material;
+    Trama trama = LISA;
+    
+    Material(TipoMaterial material){
+     this.material = material;
+     }
+     
+     Material(TipoMaterial material,Trama trama){
+     this.material = material;
+     this.trama = trama;
+     }
+ }
+ 
+ 
+ enum TipoMaterial
+ {
+    LANA,ALGODON,SEDA,LINO,POLIESTER,PIEL,PIQUE; 
+ }
+ 
+ 
+ enum Trama
+ {
+    LISA,RAYADA,LUNARES,CUADROS,ESTAMPADO;
+ }
+ 
+ 
+ Class Borrador
+ {
+    Tipo tipo 
+    Categoria categoria
+    Material material
+    Color colorPrincipal
+    Color colorSecundario
+    
+   Borrador(Tipo tipo)
+   {
+   this.tipo = tipo;
+   }
+  
+   void setTipo(Tipo tipo){
+     this.tipo = tipo;
+    }
+  
+   void setCategoria(Categoria unaCategoria){
+    this.categoria = categoria;
+    }
+  
+   void setMaterial(Material material){
+    this.material = material;
+    }
+  
+   void setColorPrincipal(Color color){
+    this.colorPrincipal = color;
+    }
+  
+   void setColorSecundario(Color color){
+    this.colorSecundario = color;
+    }
+    
+    Prenda instanciarPrenda(){
+     Prenda prenda = new Prenda(tipo,material,colorPrincipal,categoria);
+     prenda.elegirColorSecundario(colorSecundario);
+     return prenda;
+   
+  
+ }
+ 
+ CLass Uniforme
+ {
+    Prenda prendaSuperior;
+    Prenda prendaInferior;
+    Prenda calzado
+  
+    Uniforme(Prenda prendaSuperior, Prenda prendaInferior, Prenda calzado){
+    this.prendaSuperior = prendaSuperior;
+    this.prendaInferior = prendaInferior;
+    this.calzado = calzado;
+    }
+ }
+  
+ Class creadorDeUniformes
+ {
+    Uniforme armarUniforme()
+    {
+      return new Uniforme(this.crearParteSuperior(), this.crearParteInferior(), this.crearCalzado());
+    }
+
+   abstract Prenda crearParteSuperior();
+   abstract Prenda crearParteInferior();
+   abstract Prenda crearCalzado();
+  }
+
+//Estos uniformes no pasan por el control de Prenda, deben especificar todos los apartados del constructor...
+ 
+ Class UniformeSanJuan inherits creadorDeUniformes{
+ 
+  super Prenda crearParteSuperior(){
+    borrador = new Borrador(new Tipo("CHOMBA",PARTE_SUPERIOR));
+    borrador.setColorPrincipal(new Color("008F39"));
+    borrador.setMaterial(new Material("PIQUE"));
+    borrador.setCategoria(PARTE_SUPERIOR);
+    return borrador.instanciarPrenda();
+  }
+
+  super Prenda crearParteInferior(){
+    borrador = new Borrador(new Tipo("PANTALON",PARTE_INFERIOR));
+    borrador.setColorPrincipal(new Color("9B9B9B"));
+    borrador.setMaterial(new Material(ACETATO));
+    borrador.setCategoria(PARTE_INFERIOR);
+    return borrador.instanciarPrenda();
+  }
+
+  super Prenda crearCalzado(){  
+    borrador = new Borrador(new Tipo("ZAPATILLAS",CALZADO));
+    borrador.setColorPrincipal(new Color("FFFFFF"));
+    borrador.setCategoria(CALZADO);
+    return borrador.instanciarPrenda();
+  }
+  
+ Class UniformeJohnson inherits creadorDeUniformes{
+ 
+  super Prenda crearParteSuperior(){
+    borrador = new Borrador(new Tipo("CAMISA",PARTE_SUPERIOR));
+    borrador.setColorPrincipal(new Color("FFFFFF));
+    borrador.setCategoria(PARTE_SUPERIOR);
+    return borrador.instanciarPrenda();
+  }
+
+  super Prenda crearParteInferior(){
+    borrador = new Borrador(new Tipo("Pantalon de vestir",PARTE_INFERIOR));
+    borrador.setColorPrincipal(new Color("0A0A0A"));
+    borrador.setCategoria(PARTE_INFERIOR);
+    return borrador.instanciarPrenda();
+  }
+
+  super Prenda crearCalzado(){
+    borrador = new Borrador(new Tipo("ZAPATOS",CALZADO));
+    borrador.setColorPrincipal(new Color("0A0A0A"));
+    borrador.setCategoria(CALZADO);
+    return borrador.instanciarPrenda();
+  }
+  
+}
+ 
+ Correccion:
+ 
+//Se cambia el Enum de Color por una Clase color que posee un codigo RGB como atributo para lograr un mejor control.
+ 
+ Decisiones: 
+   
+//Material pasa de ser un enum a una clase para poder relacionarlo con su trama mediante un atributo, dicho atributo por defecto
+se inicializa como "LISA".
+
+//Cambio el orden de los parametros del constructor de PRENDA para cumplir los requisitos.
+
+//Para el borrador se optó por la creación de una nueva clase "BORRADOR" cuyos atributos serán seteados para poder cumplir con el requerimiento de poder cargarlo, dejarlo a medias y continuar luego, los atributos no tendran controles dentro del borrador pero si que deberan pasar por los controles del constructor de la prenda al querer instanciarla, esta solución no cumple con el FAIL FAST, aunque de momento el borrador no interactua con ningun otro modulo por lo que el riesgo es minimo (y porque se valida al final).
+
+//Para el tema del uniforme, se me ocurren 2 soluciones, que la clase uniforme tenga diferentes constructores por cada colegio que quiera instanciarlo (lo cual es poco expansible, agregar un nuevo constructor por cada nuevo colegio) y por la que voy a optar es utilizar un factory method con todas las ventajas (mas facilmente expansible) y desventajas (creación de nuevas clases por cada nuevo uniforme) que esto implica.
