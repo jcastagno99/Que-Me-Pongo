@@ -1,49 +1,120 @@
-class Atuendo
+Class Sugerencia
 {
-  ArrayList<Prenda> prendas; 
+  Prenda parteSuperior;
+  Prenda parteInferior;
+  Prenda calzado;
+  Prenda accesorio;
+  ArrayList<Prenda> prendasExtras;
+  
+  Sugerencia(Prenda parteSuperior, Prenda parteInferior, Prenda calzado, Prenda accesorio){
+   this.parteSuperior = parteSuperior;
+   this.parteInferior = parteInferior;
+   this.calzado = calzado;
+   this.accesorio = accesorio;
+   }
+   
+   Atuendo crearAtuendo(){
+   Atuendo atuendo = new Atuendo(parteSuperior, parteInferior, calzado, accesorio);
+   prendasExtras.forEach({unaPrenda -> atuendo.agregarMasPrendas(unaPrenda)});
+   temperaturaBuenosAires = condicionesClimaticasBuenosAires.conocerTemperaturaActual(); // LA API SE LLAMA UNA VEZ X RECOMENDACIÓN (LO MÍNIMO NECESARIO)
+   
+   //De querer reducir aun mas el uso de la API, se podría guardar la temperatura y actualizarla solo cada cierto tiempo, aunque esto pierde precisión en la recomendación.
+   
+   validarTemperaturaPrenda(temperaturaBuenosAires, parteSuperior);
+   validarTemperaturaPrenda(temperaturaBuenosAires, parteInferior);
+   validarTemperaturaPrenda(temperaturaBuenosAires, calzado);
+   validarTemperaturaPrenda(temperaturaBuenosAires, accesorio);
+   
+   prendasExtras.forEach({unaPrenda -> validarTemperaturaPrendar(temperatura,unaPrenda)});
+   
+   return atuendo;
+   
+   }
+   
+  Void validarTemperaturaPrenda(temperatura, Prenda unaPrenda){
+   if(unaPrenda.getTemperaturaMaxima() > temperatura){
+     throw new TemperaturaMaximaException("La prenda sobrepasa la temperatura recomendada");
+  }
 }
+
+Class Atuendo
+{
+  Prenda parteSuperior;
+  Prenda parteInferior;
+  Prenda calzado;
+  Prenda accesorio;
+  ArrayList<Prenda> prendasExtras;
   
-class Prenda{
+  Atuendo(Prenda parteSuperior, Prenda parteInferior, Prenda calzado, Prenda accesorio){
+   validarCategoriaPrenda(parteSuperior,PARTE_SUPERIOR);
+   validarCategoriaPrenda(parteInferior,PARTE_INFERIOR);
+   validarCategoriaPrenda(calzado,CALZADO);
+   validarCategoriaPrenda(accesorio,ACCESORIO);
+   this.parteSuperior = parteSuperior;
+   this.parteInferior = parteInferior;
+   this.calzado = calzado;
+   this.accesorio = accesorio;
+  }
+   
+  Void validarCategoriaPrenda(Prenda prenda, Categoria categoria){
+   if(prenda.getCategoria != categoria){
+     throw new CategoriaErroneaException("La prenda no se corresponde con la categoria a asignar");
+     }
+  }
+    
+  Void agregarMasPrendas(Prenda unaPrenda){
+   prendasExtras.add(unaPrenda);
+  }
+}
+
   
-  Tipo tipo 
-  Categoria categoria
-  Material material
-  Color colorPrincipal
-  Color colorSecundario
+Class Prenda
+{ 
+  Tipo tipo; 
+  Categoria categoria;
+  Material material;
+  Color colorPrincipal;
+  Color colorSecundario;
+  Var temperaturaMaxima;
   
    Prenda(Tipo unTipo,Material unMaterial, Color unColorPrincipal,Categoria unaCategoria){ 
-   if(unTipo == NULL){
-    throw new TipoNuloException("La prenda debe tener un tipo");
-    }
-   if(unaCategoria == NULL){
-      throw new CategoriaNulaException("La prenda debe tener una categoria");
-    }
-   if(unMaterial == NULL){
-      throw new MaterialNuloException("La prenda debe tener un material");
-    }
-   if(unColor == NULL){
-      throw new ColorNuloException("La prenda debe poseer un color principal");
-    }
+    if(unTipo == NULL){
+      throw new TipoNuloException("La prenda debe tener un tipo");
+      }
+    if(unaCategoria == NULL){
+       throw new CategoriaNulaException("La prenda debe tener una categoria");
+      }
+    if(unMaterial == NULL){
+        throw new MaterialNuloException("La prenda debe tener un material");
+      }
+    if(unColor == NULL){
+        throw new ColorNuloException("La prenda debe poseer un color principal");
+      }
 
-   if(unTipo.getCategoria != unaCategoria){  
-    throw new CategoriaException("La categoria no se corresponde con el tipo");
+     if(unTipo.getCategoria != unaCategoria){  
+     throw new CategoriaException("La categoria no se corresponde con el tipo");
+    }
+   
+    this.tipo = unTipo;
+    this.categoria = unaCategoria;
+    this.material = unMaterial;
+    this.colorPrincipal = unColorPrincipal;
+   
+    }
+   
+   Void elegirColorSecundario(Color unColor){
+     this.colorSecundario = unColor;
    }
    
-   this.tipo = unTipo;
-   this.categoria = unaCategoria;
-   this.material = unMaterial;
-   this.colorPrincipal = unColorPrincipal;
+   Var getTemparutaMaxima(){
+    return this.temperaturaMaxima;
+    }
    
-   }
-   
-   void elegirColorSecundario(Color unColor){
-   this.colorSecundario = unColor;
-   }
-   
- }
+}
  
  
- class Tipo{
+Class Tipo
+{
    String nombre;
    Categoria categoria;
    
@@ -54,133 +125,162 @@ class Prenda{
     
    Categoria getCategoria(){
      return this.categoria;
-     }  
+    }  
  }
  
  
- enum Categoria
- {
-    PARTE_SUPERIOR,CALZADO,PARTE_INFERIOR,ACCESORIOS;
- }
+Enum Categoria
+{
+   PARTE_SUPERIOR,CALZADO,PARTE_INFERIOR,ACCESORIOS;
+}
  
  
- Class Color
- {
+Class Color
+{
     String codigoRGB;
     
     Color(String codigo){
-    this.codigoRGB = codigo;
+      this.codigoRGB = codigo;
     }
- }
+}
  
  
- Class Material
- {
+Class Material
+{
     TipoMaterial material;
     Trama trama = LISA;
     
     Material(TipoMaterial material){
      this.material = material;
-     }
+    }
      
-     Material(TipoMaterial material,Trama trama){
+    Material(TipoMaterial material,Trama trama){
      this.material = material;
      this.trama = trama;
-     }
- }
+    }
+}
  
  
- enum TipoMaterial
- {
-    LANA,ALGODON,SEDA,LINO,POLIESTER,PIEL,PIQUE; 
- }
+Enum TipoMaterial
+{
+  LANA,ALGODON,SEDA,LINO,POLIESTER,PIEL,PIQUE; 
+}
  
  
- enum Trama
- {
-    LISA,RAYADA,LUNARES,CUADROS,ESTAMPADO;
- }
+Enum Trama
+{
+  LISA,RAYADA,LUNARES,CUADROS,ESTAMPADO;
+}
  
  
- Class Borrador
- {
-    Tipo tipo 
-    Categoria categoria
-    Material material
-    Color colorPrincipal
-    Color colorSecundario
+Class Borrador
+{
+   Tipo tipo 
+   Categoria categoria
+   Material material
+   Color colorPrincipal
+   Color colorSecundario
     
-   Borrador(Tipo tipo)
-   {
-   this.tipo = tipo;
+   Borrador(Tipo tipo){
+    this.tipo = tipo;
    }
   
-   void setTipo(Tipo tipo){
-     this.tipo = tipo;
-    }
+   Void setTipo(Tipo tipo){
+    this.tipo = tipo;
+   }
   
-   void setCategoria(Categoria unaCategoria){
+   Void setCategoria(Categoria unaCategoria){
     this.categoria = categoria;
-    }
+   }
   
-   void setMaterial(Material material){
+   Void setMaterial(Material material){
     this.material = material;
-    }
+   }
   
-   void setColorPrincipal(Color color){
+   Void setColorPrincipal(Color color){
     this.colorPrincipal = color;
-    }
+   }
   
-   void setColorSecundario(Color color){
+   Void setColorSecundario(Color color){
     this.colorSecundario = color;
+   }
+    
+   Prenda instanciarPrenda(){
+    Prenda prenda = new Prenda(tipo,material,colorPrincipal,categoria);
+    prenda.elegirColorSecundario(colorSecundario);
+    return prenda;
+   }
+  
+}
+ 
+ 
+Class Usuario
+{
+    ArrayList<Uniforme> uniformesRecomendados;
+    ArrayList<Atuendo> atuendosRecomendados;
+  
+    void recibirRecomendacionDeUniforme(Uniforme unUniforme){
+      uniformesRecomendados.add(unUniforme);
+      }
+      
+    void recibirRecomendacionDeAtuendo(Atuendo atuendo){
+      atuendosRecomendados.add(atuendo);
+      }
+ }
+  
+  
+Class CondicionesClimaticasBuenosAires implements AccuWeatherAPI
+{
+   AccuWeatherAPI apiClima = new AccuWeatherAPI();
+    
+   //De desear cambiar la API de clima se podría cambiar este atributo con un setter, aunque los metodos probablemente deberían ser actualizados, no encontré una mejor
+   abstracción pues desconozco que otras APIS podrían elegirse.
+    
+   List<Map<String,Object>>  condicionesClimaticas = apiClima.getWeather("Buenos Aires, Argentina");
+    
+   method conocerCiertaCondicionClimatica(condicion){
+    this.condicionesClimaticas.get(0).get(condicion);
+    }
+
+   method conocerTemperaturaActual(){
+    this.condicionesClimaticas.get(0).get("Temperatura");
     }
     
-    Prenda instanciarPrenda(){
-     Prenda prenda = new Prenda(tipo,material,colorPrincipal,categoria);
-     prenda.elegirColorSecundario(colorSecundario);
-     return prenda;
-   
-  
- }
+}
  
- CLass Uniforme
- {
+ 
+CLass Uniforme
+{
     Prenda prendaSuperior;
     Prenda prendaInferior;
     Prenda calzado
   
     Uniforme(Prenda prendaSuperior, Prenda prendaInferior, Prenda calzado){
-    this.prendaSuperior = prendaSuperior;
-    this.prendaInferior = prendaInferior;
-    this.calzado = calzado;
+      this.prendaSuperior = prendaSuperior;
+      this.prendaInferior = prendaInferior;
+      this.calzado = calzado;
     }
  }
- 
- Class Usuario
- {
-    ArrayList<Uniforme> uniformesRecomendados;
   
-    void recibirRecomendacionDeUniforme(Uniforme unUniforme){
-      uniformesRecomendados.add(unUniforme);
-  }
   
  Class creadorDeUniformes
  {
-    Uniforme armarUniforme()
-    {
-      return new Uniforme(this.crearParteSuperior(), this.crearParteInferior(), this.crearCalzado());
-    }
+   Uniforme armarUniforme(){
+     return new Uniforme(this.crearParteSuperior(), this.crearParteInferior(), this.crearCalzado());
+   }
 
    abstract Prenda crearParteSuperior();
    abstract Prenda crearParteInferior();
    abstract Prenda crearCalzado();
-  }
+ }
+
 
 //Estos uniformes no pasan por el control de Prenda, deben especificar todos los apartados del constructor...
  
- Class UniformeSanJuan inherits creadorDeUniformes{
+Class UniformeSanJuan inherits creadorDeUniformes
+{
  
-  super Prenda crearParteSuperior(){
+  Super Prenda crearParteSuperior(){
     borrador = new Borrador(new Tipo("CHOMBA",PARTE_SUPERIOR));
     borrador.setColorPrincipal(new Color("008F39"));
     borrador.setMaterial(new Material("PIQUE"));
@@ -188,7 +288,7 @@ class Prenda{
     return borrador.instanciarPrenda();
   }
 
-  super Prenda crearParteInferior(){
+  Super Prenda crearParteInferior(){
     borrador = new Borrador(new Tipo("PANTALON",PARTE_INFERIOR));
     borrador.setColorPrincipal(new Color("9B9B9B"));
     borrador.setMaterial(new Material(ACETATO));
@@ -196,14 +296,16 @@ class Prenda{
     return borrador.instanciarPrenda();
   }
 
-  super Prenda crearCalzado(){  
+  Super Prenda crearCalzado(){  
     borrador = new Borrador(new Tipo("ZAPATILLAS",CALZADO));
     borrador.setColorPrincipal(new Color("FFFFFF"));
     borrador.setCategoria(CALZADO);
     return borrador.instanciarPrenda();
   }
+}
   
- Class UniformeJohnson inherits creadorDeUniformes{
+Class UniformeJohnson inherits creadorDeUniformes
+{
  
   super Prenda crearParteSuperior(){
     borrador = new Borrador(new Tipo("CAMISA",PARTE_SUPERIOR));
@@ -227,18 +329,17 @@ class Prenda{
   }
   
 }
- 
- Correccion:
- 
-//Se cambia el Enum de Color por una Clase color que posee un codigo RGB como atributo para lograr un mejor control.
- 
+
  Decisiones: 
+ 
+- Los controles de que las categorias sean adecuadas se hacen en el constructor del Atuendo, como no se pide crear Atuendos (para recomendaciones) a medias, se obliga a que
+se cumpla como mínimo con el requisito de 1 prenda por categoría, además del apartado de prendas extras (para el cual no hay control). Esto permite además de cumplir el requisito, que no haya atuendos inconsistentes.
+
+- El control de temperatura se delega en la Clase Sugerencia, la cual instancia un Atuendo pero validando las temperaturas correctas.
+
+- Cada prenda conoce hasta que temperatura es recomendable de usar.
+
+- Los Usuarios tienen una lista de Atuendos como recomendaciones y pueden recibir las mismas mediante un método.
+
+- La API de clima (solo codeada para BUENOS AIRES por el dominio de la entrega) es un objeto global (NO SE ESPECIFÍCA EN EL CÓDIGO).
    
-//Material pasa de ser un enum a una clase para poder relacionarlo con su trama mediante un atributo, dicho atributo por defecto
-se inicializa como "LISA".
-
-//Cambio el orden de los parametros del constructor de PRENDA para cumplir los requisitos.
-
-//Para el borrador se optó por la creación de una nueva clase "BORRADOR" cuyos atributos serán seteados para poder cumplir con el requerimiento de poder cargarlo, dejarlo a medias y continuar luego, los atributos no tendran controles dentro del borrador pero si que deberan pasar por los controles del constructor de la prenda al querer instanciarla, esta solución no cumple con el FAIL FAST, aunque de momento el borrador no interactua con ningun otro modulo por lo que el riesgo es minimo (y porque se valida al final).
-
-//Para el tema del uniforme, se me ocurren 2 soluciones, que la clase uniforme tenga diferentes constructores por cada colegio que quiera instanciarlo (lo cual es poco expansible, agregar un nuevo constructor por cada nuevo colegio) y por la que voy a optar es utilizar un factory method con todas las ventajas (mas facilmente expansible) y desventajas (creación de nuevas clases por cada nuevo uniforme) que esto implica.
