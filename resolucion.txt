@@ -5,21 +5,21 @@ Class Sugerencia
   Prenda calzado;
   Prenda accesorio;
   ArrayList<Prenda> prendasExtras;
+  ServicioMeteorologico servicioMeteorologico; 
   
-  Sugerencia(Prenda parteSuperior, Prenda parteInferior, Prenda calzado, Prenda accesorio){
+  Sugerencia(Prenda parteSuperior, Prenda parteInferior, Prenda calzado, Prenda accesorio, ServicioMeteorologico  servicioMeteorologico){
    this.parteSuperior = parteSuperior;
    this.parteInferior = parteInferior;
    this.calzado = calzado;
    this.accesorio = accesorio;
+   this.servicioMeteorologico = servicioMeteorologico
    }
    
    Atuendo crearAtuendo(){
    Atuendo atuendo = new Atuendo(parteSuperior, parteInferior, calzado, accesorio);
    prendasExtras.forEach({unaPrenda -> atuendo.agregarMasPrendas(unaPrenda)});
-   temperaturaBuenosAires = condicionesClimaticasBuenosAires.conocerTemperaturaActual(); // LA API SE LLAMA UNA VEZ X RECOMENDACIÓN (LO MÍNIMO NECESARIO)
-   
-   //De querer reducir aun mas el uso de la API, se podría guardar la temperatura y actualizarla solo cada cierto tiempo, aunque esto pierde precisión en la recomendación.
-   
+   temperaturaBuenosAires = servicioMeteorologico.obtenerCondicionesClimaticas("Buenos Aires);
+    
    validarTemperaturaPrenda(temperaturaBuenosAires, parteSuperior);
    validarTemperaturaPrenda(temperaturaBuenosAires, parteInferior);
    validarTemperaturaPrenda(temperaturaBuenosAires, calzado);
@@ -218,7 +218,43 @@ Class Usuario
 {
     ArrayList<Uniforme> uniformesRecomendados;
     ArrayList<Atuendo> atuendosRecomendados;
-  
+    ArrayList<Guardaropa> misGuardaRopas;
+    
+    void crearGuardaRopasCompartidoCon(Enum criterio, ArrayList<Prenda> prendas, ArrayList<Usuario> usuarios){
+    GuardaRopa guardaRopa = new GuardaRopa(criterio,prendas);
+    this.agregarGuardaRopa(guardaRopa);
+    usuarios.map(usuario -> usuario.agregarGuardaRopa(guardaRopa);
+    }
+    
+    void agregarGuardaRopa(GuardaRopa guardaRopa){
+      this.misGuardaRopas.add(guardaRopa);
+    }
+    
+    void recibirPropuestaModificacion(Modificacion unaModificacion){
+      unaModificacion.getguardaRopa.agregarModificacion(unaModificacion);
+    }
+    
+    void aceptarModificacion(Modificacion unaModificacion){
+    if(!unaModificacion.aplicada){
+     unaModificacion.aplicar();
+      }
+     else{
+      throw new ModificacionException("La modficacion ya habia sido aplicada);
+     }
+    }
+    
+    void rechazarModificacion(Modificacion unaModificacion){
+       unaModificacion.getguardaRopa.quitarModificacion(unaModificacion);
+     }
+    }
+    
+    void deshacerUnaModificacion(Modificacion unaModificacion){
+    if(unaModificacion.aplicada){
+    unaModificacion.deshacer();
+     }
+     
+    }
+
     void recibirRecomendacionDeUniforme(Uniforme unUniforme){
       uniformesRecomendados.add(unUniforme);
       }
@@ -227,26 +263,108 @@ Class Usuario
       atuendosRecomendados.add(atuendo);
       }
  }
-  
-  
-Class CondicionesClimaticasBuenosAires implements AccuWeatherAPI
+ 
+Class GuardaRopa
 {
-   AccuWeatherAPI apiClima = new AccuWeatherAPI();
+    Enum Criterio;
+    ArrayList<Prenda> misPrendas;
+    ArrayList<Modificacion> modificaciones;
     
-   //De desear cambiar la API de clima se podría cambiar este atributo con un setter, aunque los metodos probablemente deberían ser actualizados, no encontré una mejor
-   abstracción pues desconozco que otras APIS podrían elegirse.
-    
-   List<Map<String,Object>>  condicionesClimaticas = apiClima.getWeather("Buenos Aires, Argentina");
-    
-   method conocerCiertaCondicionClimatica(condicion){
-    this.condicionesClimaticas.get(0).get(condicion);
+    GuardaRopa(Criterio criterio, Arraylist<Prenda> prendas){
+    this.criterio = criterio;
+    this.misPrendas = prendas;
     }
-
-   method conocerTemperaturaActual(){
-    this.condicionesClimaticas.get(0).get("Temperatura");
+    
+    void agregarUnaPrenda(Prenda prenda){
+    misPrendas.add(prenda);
     }
+    
+    void quitarUnaPrenda(Prenda prenda){
+    misPrendas.remove(prenda);
+    }
+    
+    void agregarModificacion(Modificacion unaModificacion){
+    modificaciones.add(unaModificacion);
+    }
+    
+    void quitarModificacion(Modifcacion unaModificacion){
+    modificaciones.remove(unaModificacion);
+    }
+   
+}
+ 
+Enum Criterio
+{
+ ROPA_DE_VIAJE,ROPA_ENTRECASA,ROPA_DEPORTIVA,ROPA_DE_SALIR,etc.
+}
+ 
+Abstract Class Modificacion
+{
+  
+  Prenda prenda;
+  GuardaRopa guardaRopa;
+  Bool aplicada = false;
+ 
+  abstract method aplicarModificacion();
+  abstract method deshacerModificacion();
+  
+}
+ 
+Class AgregarPrenda Extends Modificacion
+{
+   
+   void aplicarModificacion(){
+   guardaRopa.agregarPrenda(prenda);
+   aplicada = true;
+   }
+   
+   void deshacerModificacion(){
+   guardaRopa.quitarPrenda(prenda);
+   aplicada = false;
+   }
     
 }
+ 
+Class QuitarPrenda Extends Modificacion
+{
+ 
+  void aplicarModificacion(){
+   guardaRopa.quitarPrenda(prenda);
+   aplicada = true;
+   
+   }
+   
+   void deshacerModificacion(){
+   guardaRopa.agregarPrenda(prenda);
+   aplicada = false;
+   }
+    
+    
+}
+ 
+ 
+Interface ServicioMeteorologico
+{
+   EstadoDelTiempo obtenerCondicionesClimaticas(String direccion);
+}
+  
+  
+Class ServicioMeteorologicoAccuWeather implements ServicioMeteorologico
+{
+
+private Map<String, RespuestaMeteorologica> ultimasRespuestas;
+public ServicioMeteorologico(AccuWeatherAPI api, Duration periodoDeValidez) { 
+   this.api = api;            
+   this.periodoDeValidez = periodoDeValidez;  
+   this.ultimasRespuestas = new HashMap<String, Object>();
+ }
+  
+ public EstadoDelTiempo obtenerCondicionesClimaticas(String direccion) {
+   if (!this.ultimasRespuestas.contains(direccion) || this.ultimasRespuestas.get(direccion).expiro()) {
+    ultimasRespuestas.put(new RespuestaMeteorologica(consultarApi(direccion), proximaExpiracion()));    
+   }
+   return this.ultimasRespuestas.get(direccion).getEstadoDelTiempo();
+}  
  
  
 CLass Uniforme
@@ -332,14 +450,8 @@ Class UniformeJohnson inherits creadorDeUniformes
 
  Decisiones: 
  
-- Los controles de que las categorias sean adecuadas se hacen en el constructor del Atuendo, como no se pide crear Atuendos (para recomendaciones) a medias, se obliga a que
-se cumpla como mínimo con el requisito de 1 prenda por categoría, además del apartado de prendas extras (para el cual no hay control). Esto permite además de cumplir el requisito, que no haya atuendos inconsistentes.
+- No hay un control de prendas y criterio del guardarropa porque es algo personalizable por el usuario, es decir, un usuario podria elegir una camisa vieja, un shoggin y medias de salir y clasificarlas como "ROPA_DE_PIJAMA", por lo que al ser tan subjetivo prefiero no poner controles sobre esas categorias.
 
-- El control de temperatura se delega en la Clase Sugerencia, la cual instancia un Atuendo pero validando las temperaturas correctas.
+- Para que los usuarios compartan un guardaRopasCompartido, varios usuarios referenciaran al mismo objeto guardaRopa, al momento de que un usuario instancie un guardaRopaCompartido se le avisara a todos los usuarios con los que comparte que deberan agregarlo a su lista de guardaRopas (se podria añadir un control para aceptar o denegar la solicitud)
 
-- Cada prenda conoce hasta que temperatura es recomendable de usar.
-
-- Los Usuarios tienen una lista de Atuendos como recomendaciones y pueden recibir las mismas mediante un método.
-
-- La API de clima (solo codeada para BUENOS AIRES por el dominio de la entrega) es un objeto global (NO SE ESPECIFÍCA EN EL CÓDIGO).
-   
+- Existe una doble referencia entre una modificacion (que conoce a su guardaRopa) y un guardaRopa (que tiene una lista de modificaciones) esto se justifica ya que se usan para poder rollbackear modificaciones sobre un guardaRopa
