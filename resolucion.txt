@@ -31,10 +31,21 @@ Class Sugerencia
    
    }
    
+  //Puede ser que haya logica repetida, pero las validaciones se hacen en distintos momentos de la instanciación y para distintos casos de uso.. 
+  
+  Bool esAdecuadaPara(temperatura){
+    validarTemperaturaPrenda(temperatura, parteSuperior);
+    validarTemperaturaPrenda(temperatura, parteInferior);
+    validarTemperaturaPrenda(temperatura, calzado);
+    validarTemperaturaPrenda(temperatura, accesorio);
+    return true;
+  }
+   
   Void validarTemperaturaPrenda(temperatura, Prenda unaPrenda){
    if(unaPrenda.getTemperaturaMaxima() > temperatura){
      throw new TemperaturaMaximaException("La prenda sobrepasa la temperatura recomendada");
   }
+ 
 }
 
 Class Atuendo
@@ -209,53 +220,206 @@ Class Borrador
     Prenda prenda = new Prenda(tipo,material,colorPrincipal,categoria);
     prenda.elegirColorSecundario(colorSecundario);
     return prenda;
-   }
-  
+   } 
 }
+
+--------------------------------------------------------------------------- QMP6 ------------------------------------------------------------------------------------
+
+Interface ObservadorAlerta
+{
+  void alertasRecibidas(List<String> alertas, List<Usuarios> usuarios);
+}
+
+Class sugerenciaDiariaObserver implements ObservadorAlerta
+{
+
+ ServicioMeteorologicoAccuWeather servicioMeteorologico;
+ List<Sugerencia> poolDeSugerencias;
  
+ //No estaba seguro como hacer esta lógica, así que asumo que este observer tiene una pool de sugerencias, la cual se filtra por la condicion actual
+ // y se envia la primera de la lista apta, se podria añadir una lógica extra aca y un controlador por si no existe alguna sugerencia optima para la
+ // temperatura, pero como ya de por si estoy suponiendo una solución lo voy a dejar como una "posible aproximación que falta pulir" -> Preguntar en clase.
+ 
+ void alertasRecibidas(List<String> alertas, List<Usuarios> usuarios){
+    if(alertas.size() > 0){
+    temperatura = servicioMeteorologico.obtenerCondicionesClimaticas();
+    List<Sugerencia> sugerenciasAdecuadas = poolDeSugerencias.filter(sugerencia -> sugerencia.esAdecuadaPara(temperatura));
+    QueMePongoService.getInstance().enviarSugerenciaDiaria(sugerenciasAdecuadas.get(0));
+    }
+ }
+ 
+}
+
+Class notificadorTormentaObserver implements ObservadorAlerta
+{
+ 
+  NotificationService notificador;
+  
+  // No se de que forma notificar a un usuario específico, así que se lo delego al notify y me lavo las manos // otra opción es asumir que siempre les notifica a todos
+  // Y no hacer nada con la lista de usuarios.
+ 
+  void alertasRecibidas(List<String> alertas, List<Usuarios> usuarios){
+    if(alertas.contains("STORM"){
+      usuarios.forEach(usuario -> notificador.notify(usuario,"Hay alerta de tormenta, recuerda llevarte un paraguas");
+       }
+    }
+}
+
+Class notificadorGranizoObserver implements ObservadorAlerta
+{
+ 
+  NotificationService notificador;
+  
+  // No se de que forma notificar a un usuario específico, así que se lo delego al notify y me lavo las manos // otra opción es asumir que siempre les notifica a todos
+  // Y no hacer nada con la lista de usuarios.
+ 
+  void alertasRecibidas(List<String> alertas, List<Usuarios> usuarios){
+    if(alertas.contains("HAIL"){
+      usuarios.forEach(usuario -> notificador.notify(usuario,"Hay alerta de granizo, recuerda evita salir en auto");
+       }
+    }
+}
+
+Class mailObserver implements ObservadorAlerta
+{
+    MailSender enviadorDeMails;
+    
+   void alertasRecibidas(List<String> alertas, List<Usuarios> usuarios){
+    if(alertas.size() > 0){
+      String mensaje = "Se recibieron las siguientes alertas meteorologicas: " ++ String.join(",",alertas);
+      usuarios.forEach(usuario -> enviadorDeMails.send(usuario.getEmail(),mensaje));
+       }
+    }
+}
+
+//SINGLETON
+Class QueMePongoService
+{
+   List<Usuario> usuarios;
+   List<String> alertasMeteorologicasActuales;
+   ServicioMeteorologicoAccuWeather servicioMeteorologico;
+   List<ObservadorAlerta> observadores; 
+   
+   private static final QueMePongoService INSTANCE = new QueMePongoService();
+   
+   public static QueMePongoService getInstance() { return INSTANCE; }
+    
+    // Se le envia la misma sugerencia a todos los usuarios, el enunciado no define sobre una "sugerencia personalizada"
+    
+    Void enviarSugerenciaDiaria(Sugerencia unaSugerencia){
+      usuarios.forEach(usuario -> usuario.actualizarSugerenciaDiaria(unaSugerencia);
+    }
+    
+    Void actualizarAlertasMeteorologicas(){
+      alertasMeteorologicasActuales = servicioMeteorologico.obtenerAlertasMeteorologicas();
+      observadores.forEach[observador -> observador.alertasRecibidas(alertasMeteorologicasActuales,usuarios);
+    }
+    
+    Void agregarObservador(ObservadorAlerta unObservador){
+      observadores.add(unObservador);
+    }
+    
+    Void eliminarObservador(ObservadorAlerta unObservador){
+      observadores.remove(unObservador);
+    }
+    
+    List<String> getAlertasMeteorologicasActuales{
+      return alertasMeteorologicasActuales;
+    }
+    
+}
  
 Class Usuario
 {
     List<Uniforme> uniformesRecomendados;
     List<Atuendo> atuendosRecomendados;
     List<Guardaropa> misGuardarropas;
-     
+    String email;
+    
+    Sugerencia sugerenciaDiaria;
+    
+    Void actualizarSugerenciaDiaria(Sugerencia unaSugerencia){
+      sugerenciaDiaria = unaSugerencia;
+    }
+    
+    List<String> conocerAlertasMeterologicas(){
+      return QueMePongoService.getInstance().getAlertasMeteorologicasActuales();
+    }
+    
     void compartirGuardarropa(Guardarropa unGuardarropa){
       misGuardarropas.add(unGuardarropa);
     }
     
     //Código duplicado pero que atacan distintos problemas, en lo que es modelar requerimientos lo veo bien separarlo.
     
-    void agregarGuardarropa(Guardarropa unGuardarropa){
+    Void agregarGuardarropa(Guardarropa unGuardarropa){
       this.misGuardaropas.add(guardaRopa);
     }
     
-    void recibirPropuestaModificacion(Modificacion unaModificacion){
+    Void recibirPropuestaModificacion(Modificacion unaModificacion){
       unaModificacion.getguardarropa.agregarModificacion(unaModificacion);
     }
     
-    void aceptarModificacion(Modificacion unaModificacion){
+    Void aceptarModificacion(Modificacion unaModificacion){
      unaModificacion.aplicarModificacion();
     }
     
-    void rechazarModificacion(Modificacion unaModificacion){
+    Void rechazarModificacion(Modificacion unaModificacion){
        unaModificacion.getguardaRopa.quitarModificacion(unaModificacion);
      }
     }
     
-    void deshacerUnaModificacion(Modificacion unaModificacion){
+    Void deshacerUnaModificacion(Modificacion unaModificacion){
     unaModificacion.deshacerModificacion();
     }
 
-    void recibirRecomendacionDeUniforme(Uniforme unUniforme){
+    Void recibirRecomendacionDeUniforme(Uniforme unUniforme){
       uniformesRecomendados.add(unUniforme);
       }
       
-    void recibirRecomendacionDeAtuendo(Atuendo atuendo){
+    Void recibirRecomendacionDeAtuendo(Atuendo atuendo){
       atuendosRecomendados.add(atuendo);
       }
+     
+    String getEmail(){
+      return email;
+    }
+    
  }
  
+Interface ServicioMeteorologico
+{
+   EstadoDelTiempo obtenerCondicionesClimaticas(String direccion);
+}
+  
+  
+Class ServicioMeteorologicoAccuWeather implements ServicioMeteorologico
+{
+
+private Map<String, RespuestaMeteorologica> ultimasRespuestas;
+AccWeatherAPI api;
+Duration periodoDeValidez;
+
+public ServicioMeteorologico(AccuWeatherAPI api, Duration periodoDeValidez) { 
+   this.api = api;            
+   this.periodoDeValidez = periodoDeValidez;  
+   this.ultimasRespuestas = new HashMap<String, Object>();
+ }
+  
+ public EstadoDelTiempo obtenerCondicionesClimaticas(String direccion) {
+   if (!this.ultimasRespuestas.contains(direccion) || this.ultimasRespuestas.get(direccion).expiro()) {
+    ultimasRespuestas.put(new RespuestaMeteorologica(consultarApi(direccion), proximaExpiracion()));    
+   }
+   return this.ultimasRespuestas.get(direccion).getEstadoDelTiempo();
+   }
+   
+ private List<String> obtenerAlertasMetereologicas{
+   Map<String, Object> alertas = apiClima.getAlertas(“Buenos Aires”); 
+   return alertas.get("CurrentAlerts")
+   }
+}  
+ 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Class Guardarropa
 {
     List<Prenda> misPrendas;
@@ -285,7 +449,6 @@ Class Guardarropa
  
 Abstract Class Modificacion
 {
-  
   Prenda prenda;
   Guardaropa miGuardarropa;
   Estado estado;
@@ -339,32 +502,7 @@ Enum Estado
 {
  APLICADA,DESHECHA;
 }
- 
- 
-Interface ServicioMeteorologico
-{
-   EstadoDelTiempo obtenerCondicionesClimaticas(String direccion);
-}
-  
-  
-Class ServicioMeteorologicoAccuWeather implements ServicioMeteorologico
-{
 
-private Map<String, RespuestaMeteorologica> ultimasRespuestas;
-public ServicioMeteorologico(AccuWeatherAPI api, Duration periodoDeValidez) { 
-   this.api = api;            
-   this.periodoDeValidez = periodoDeValidez;  
-   this.ultimasRespuestas = new HashMap<String, Object>();
- }
-  
- public EstadoDelTiempo obtenerCondicionesClimaticas(String direccion) {
-   if (!this.ultimasRespuestas.contains(direccion) || this.ultimasRespuestas.get(direccion).expiro()) {
-    ultimasRespuestas.put(new RespuestaMeteorologica(consultarApi(direccion), proximaExpiracion()));    
-   }
-   return this.ultimasRespuestas.get(direccion).getEstadoDelTiempo();
-}  
- 
- 
 CLass Uniforme
 {
     Prenda prendaSuperior;
@@ -446,10 +584,11 @@ Class UniformeJohnson inherits creadorDeUniformes
   
 }
 
- Decisiones: 
- 
-- No hay un control de prendas y criterio del guardarropa porque es algo personalizable por el usuario, es decir, un usuario podria elegir una camisa vieja, un shoggin y medias de salir y clasificarlas como "ROPA_DE_PIJAMA", por lo que al ser tan subjetivo prefiero no poner controles sobre esas categorias.
+Decisiones: 
+- Se descarta la creación de una clase empleado y se opta por un singleton RepositorioUsuario al cual mediante UI se le activa el metodo que actualice las sugerencias diarias y que envie las señales de alerta meteorologica --> El singleton pasa a ser mas que un repositorio, Class QueMePongoService
 
-- Para que los usuarios compartan un guardaRopasCompartido, varios usuarios referenciaran al mismo objeto guardaRopa, al momento de que un usuario instancie un guardaRopaCompartido se le avisara a todos los usuarios con los que comparte que deberan agregarlo a su lista de guardaRopas (se podria añadir un control para aceptar o denegar la solicitud)
+- La mayoria de requerimientos se resolvieron implementando el patron OBSERVER, el evento se lanza cuando un empleado actualiza las alertasMeteorologicas en el Singleton QueMePongoService
 
-- Existe una doble referencia entre una modificacion (que conoce a su guardaRopa) y un guardaRopa (que tiene una lista de modificaciones) esto se justifica ya que se usan para poder rollbackear modificaciones sobre un guardaRopa
+- Se optó por que sean los propios observadores que desglocen la lista de alertas ( List<String ) y pregunten si existe la alerta que ellos esperan
+
+- Se optó por tambien pasarle a los observadores la lista de usuarios (todos los dados de alta en el sistema) para que puedieran realizar las notificaciones o lógicas necesarias
