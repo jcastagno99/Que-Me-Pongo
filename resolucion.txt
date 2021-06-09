@@ -230,10 +230,10 @@ Interface ObservadorAlerta
   void alertasRecibidas(List<String> alertas, List<Usuarios> usuarios);
 }
 
-Class sugerenciaDiariaObserver implements ObservadorAlerta
+Class SugerenciaDiariaObserver implements ObservadorAlerta
 {
 
- ServicioMeteorologicoAccuWeather servicioMeteorologico;
+ ServicioMeteorologico servicioMeteorologico;
  List<Sugerencia> poolDeSugerencias;
  
  //No estaba seguro como hacer esta lógica, así que asumo que este observer tiene una pool de sugerencias, la cual se filtra por la condicion actual
@@ -250,7 +250,7 @@ Class sugerenciaDiariaObserver implements ObservadorAlerta
  
 }
 
-Class notificadorTormentaObserver implements ObservadorAlerta
+Class NotificadorTormentaObserver implements ObservadorAlerta
 {
  
   NotificationService notificador;
@@ -265,7 +265,7 @@ Class notificadorTormentaObserver implements ObservadorAlerta
     }
 }
 
-Class notificadorGranizoObserver implements ObservadorAlerta
+Class NotificadorGranizoObserver implements ObservadorAlerta
 {
  
   NotificationService notificador;
@@ -280,7 +280,7 @@ Class notificadorGranizoObserver implements ObservadorAlerta
     }
 }
 
-Class mailObserver implements ObservadorAlerta
+Class MailObserver implements ObservadorAlerta
 {
     MailSender enviadorDeMails;
     
@@ -297,7 +297,7 @@ Class QueMePongoService
 {
    List<Usuario> usuarios;
    List<String> alertasMeteorologicasActuales;
-   ServicioMeteorologicoAccuWeather servicioMeteorologico;
+   ServicioMeteorologico servicioMeteorologico;
    List<ObservadorAlerta> observadores; 
    
    private static final QueMePongoService INSTANCE = new QueMePongoService();
@@ -390,6 +390,7 @@ Class Usuario
 Interface ServicioMeteorologico
 {
    EstadoDelTiempo obtenerCondicionesClimaticas(String direccion);
+   List<String> obtenerAlertasMeteorologicas();
 }
   
   
@@ -469,6 +470,10 @@ Abstract Class Modificacion
     this.deshacerOperacion();
   }
   
+  abstract void aplicarOperacion();
+  
+  abstract void deshacerOperacion();
+  
 }
  
 Class AgregarPrenda Extends Modificacion
@@ -479,7 +484,7 @@ Class AgregarPrenda Extends Modificacion
    }
    
    void deshacerOperacion(){
-   miGuardaropa.quitarPrenda(prenda);
+   miGuardarropa.quitarPrenda(prenda);
    }
     
 }
@@ -488,11 +493,11 @@ Class QuitarPrenda Extends Modificacion
 {
  
   void aplicarOperacion(){
-   miGuardaropa.quitarPrenda(prenda);
+   miGuardarropa.quitarPrenda(prenda);
    }
    
    void deshacerOperacion(){
-   miGuardaropa.agregarPrenda(prenda);
+   miGuardarropa.agregarPrenda(prenda);
    }
     
     
@@ -502,6 +507,8 @@ Enum Estado
 {
  APLICADA,DESHECHA;
 }
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 CLass Uniforme
 {
