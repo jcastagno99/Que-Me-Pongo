@@ -4,7 +4,7 @@ Class Sugerencia
   Prenda parteInferior;
   Prenda calzado;
   Prenda accesorio;
-  ArrayList<Prenda> prendasExtras;
+  List<Prenda> prendasExtras;
   ServicioMeteorologico servicioMeteorologico; 
   
   Sugerencia(Prenda parteSuperior, Prenda parteInferior, Prenda calzado, Prenda accesorio, ServicioMeteorologico  servicioMeteorologico){
@@ -43,7 +43,7 @@ Class Atuendo
   Prenda parteInferior;
   Prenda calzado;
   Prenda accesorio;
-  ArrayList<Prenda> prendasExtras;
+  List<Prenda> prendasExtras;
   
   Atuendo(Prenda parteSuperior, Prenda parteInferior, Prenda calzado, Prenda accesorio){
    validarCategoriaPrenda(parteSuperior,PARTE_SUPERIOR);
@@ -216,31 +216,26 @@ Class Borrador
  
 Class Usuario
 {
-    ArrayList<Uniforme> uniformesRecomendados;
-    ArrayList<Atuendo> atuendosRecomendados;
-    ArrayList<Guardaropa> misGuardaRopas;
-    
-    void crearGuardaRopasCompartidoCon(Enum criterio, ArrayList<Prenda> prendas, ArrayList<Usuario> usuarios){
-    GuardaRopa guardaRopa = new GuardaRopa(criterio,prendas);
-    this.agregarGuardaRopa(guardaRopa);
-    usuarios.map(usuario -> usuario.agregarGuardaRopa(guardaRopa);
+    List<Uniforme> uniformesRecomendados;
+    List<Atuendo> atuendosRecomendados;
+    List<Guardaropa> misGuardarropas;
+     
+    void compartirGuardarropa(Guardarropa unGuardarropa){
+      misGuardarropas.add(unGuardarropa);
     }
     
-    void agregarGuardaRopa(GuardaRopa guardaRopa){
-      this.misGuardaRopas.add(guardaRopa);
+    //Código duplicado pero que atacan distintos problemas, en lo que es modelar requerimientos lo veo bien separarlo.
+    
+    void agregarGuardarropa(Guardarropa unGuardarropa){
+      this.misGuardaropas.add(guardaRopa);
     }
     
     void recibirPropuestaModificacion(Modificacion unaModificacion){
-      unaModificacion.getguardaRopa.agregarModificacion(unaModificacion);
+      unaModificacion.getguardarropa.agregarModificacion(unaModificacion);
     }
     
     void aceptarModificacion(Modificacion unaModificacion){
-    if(!unaModificacion.aplicada){
-     unaModificacion.aplicar();
-      }
-     else{
-      throw new ModificacionException("La modficacion ya habia sido aplicada);
-     }
+     unaModificacion.aplicarModificacion();
     }
     
     void rechazarModificacion(Modificacion unaModificacion){
@@ -249,10 +244,7 @@ Class Usuario
     }
     
     void deshacerUnaModificacion(Modificacion unaModificacion){
-    if(unaModificacion.aplicada){
-    unaModificacion.deshacer();
-     }
-     
+    unaModificacion.deshacerModificacion();
     }
 
     void recibirRecomendacionDeUniforme(Uniforme unUniforme){
@@ -264,14 +256,12 @@ Class Usuario
       }
  }
  
-Class GuardaRopa
+Class Guardarropa
 {
-    Enum Criterio;
-    ArrayList<Prenda> misPrendas;
-    ArrayList<Modificacion> modificaciones;
+    List<Prenda> misPrendas;
+    List<Modificacion> modificaciones;
     
-    GuardaRopa(Criterio criterio, Arraylist<Prenda> prendas){
-    this.criterio = criterio;
+    Guardarropa(Arraylist<Prenda> prendas){
     this.misPrendas = prendas;
     }
     
@@ -293,34 +283,40 @@ Class GuardaRopa
    
 }
  
-Enum Criterio
-{
- ROPA_DE_VIAJE,ROPA_ENTRECASA,ROPA_DEPORTIVA,ROPA_DE_SALIR,etc.
-}
- 
 Abstract Class Modificacion
 {
   
   Prenda prenda;
-  GuardaRopa guardaRopa;
-  Bool aplicada = false;
+  Guardaropa miGuardarropa;
+  Estado estado;
  
-  abstract method aplicarModificacion();
-  abstract method deshacerModificacion();
+  abstract method aplicarModificacion(){
+    if(estado == APLICADA){
+     throw new ModificacionException("La modficacion ya habia sido aplicada");
+    }
+    estado = APLICADA;
+    this.aplicarOperacion();
+  }
+  
+  abstract method deshacerModificacion(){
+    if(estado == DESHECHA){
+    throw new ModificacionException("No se puede deshacer una modificacion que no esta vigente");
+    }
+    estado = DESHECHA;
+    this.deshacerOperacion();
+  }
   
 }
  
 Class AgregarPrenda Extends Modificacion
 {
    
-   void aplicarModificacion(){
-   guardaRopa.agregarPrenda(prenda);
-   aplicada = true;
+   void aplicarOperacion(){
+   miGuardaropa.agregarPrenda(prenda);
    }
    
-   void deshacerModificacion(){
-   guardaRopa.quitarPrenda(prenda);
-   aplicada = false;
+   void deshacerOperacion(){
+   miGuardaropa.quitarPrenda(prenda);
    }
     
 }
@@ -328,18 +324,20 @@ Class AgregarPrenda Extends Modificacion
 Class QuitarPrenda Extends Modificacion
 {
  
-  void aplicarModificacion(){
-   guardaRopa.quitarPrenda(prenda);
-   aplicada = true;
-   
+  void aplicarOperacion(){
+   miGuardaropa.quitarPrenda(prenda);
    }
    
-   void deshacerModificacion(){
-   guardaRopa.agregarPrenda(prenda);
-   aplicada = false;
+   void deshacerOperacion(){
+   miGuardaropa.agregarPrenda(prenda);
    }
     
     
+}
+
+Enum Estado
+{
+ APLICADA,DESHECHA;
 }
  
  
